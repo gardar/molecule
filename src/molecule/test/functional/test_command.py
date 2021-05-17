@@ -18,6 +18,8 @@
 #  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #  DEALINGS IN THE SOFTWARE.
 
+import os
+
 import pytest
 
 from molecule.util import run_command
@@ -250,3 +252,20 @@ def test_command_test(scenario_to_test, with_scenario, scenario_name, driver_nam
 )
 def test_command_verify(scenario_to_test, with_scenario, scenario_name):
     pytest.helpers.verify(scenario_name)
+
+
+@pytest.mark.parametrize(
+    "shell",
+    [
+        "bash",
+        "zsh",
+        "fish",
+    ],
+)
+def test_command_completion(shell):
+    env = os.environ.copy()
+    env["_MOLECULE_COMPLETE"] = f"{shell}_source"
+
+    result = run_command(["molecule"], env=env)
+    assert result.returncode == 0
+    assert "Found config file" not in result.stdout
